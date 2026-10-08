@@ -1,0 +1,49 @@
+{
+  "release": "2026-09-23.1",
+  "theme": "places",
+  "type": "place",
+  "bbox": [
+    139.6997,
+    35.6518,
+    139.7217,
+    35.6698
+  ],
+  "feature_count": 13322,
+  "generated_at": "2026-10-08T09:35:42+00:00",
+  "datasets": {
+    "Overture": 13322,
+    "meta": 10608,
+    "Foursquare": 2030,
+    "Microsoft": 366,
+    "AllThePlaces": 309,
+    "DAC": 5,
+    "PinMeTo": 4,
+    "Overture-signals": 1
+  },
+  "licenses": {
+    "Overture (CDLA-Permissive-2.0)": 13322,
+    "meta (CDLA-Permissive-2.0)": 10608,
+    "Foursquare (Apache-2.0)": 2030,
+    "Microsoft (CDLA-Permissive-2.0)": 366,
+    "AllThePlaces (CC0-1.0)": 309,
+    "DAC (CDLA-Permissive-2.0)": 5,
+    "PinMeTo (CDLA-Permissive-2.0)": 4,
+    "Overture-signals (CDLA-Permissive-2.0)": 1
+  },
+  "groups": {
+    "food_and_drink": 3605,
+    "shopping": 2987,
+    "services_and_business": 2201,
+    "lifestyle_services": 1845,
+    "health_care": 487,
+    "arts_and_entertainment": 479,
+    "education": 434,
+    "uncategorized": 373,
+    "sports_and_recreation": 320,
+    "travel_and_transportation": 210,
+    "community_and_government": 152,
+    "cultural_and_historic": 148,
+    "lodging": 63,
+    "geographic_entities": 18
+  }
+}
