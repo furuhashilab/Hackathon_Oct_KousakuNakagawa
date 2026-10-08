@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aoyama Overture Places Map | 青山キャンパス周辺 POI マップ</title>
+  <meta name="description" content="Overture Maps の Places データで、青山学院大学 青山キャンパス周辺の POI を可視化した WebGIS です。">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6' fill='%231f5fa8'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.13.0/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <h1>青山キャンパス周辺 POI マップ <span class="sub">with Overture Maps Places</span></h1>
+    <button id="panel-toggle" class="panel-toggle" type="button" aria-controls="panel" aria-expanded="true">パネル</button>
+  </header>
+
+  <main class="layout">
+    <div id="map" class="map" role="region" aria-label="地図"></div>
+
+    <aside id="panel" class="panel">
+      <nav class="tabs" role="tablist">
+        <button class="tab is-active" role="tab" data-tab="filter" aria-selected="true">絞り込み</button>
+        <button class="tab" role="tab" data-tab="about" aria-selected="false">解説</button>
+        <button class="tab" role="tab" data-tab="credit" aria-selected="false">出典</button>
+      </nav>
+
+      <!-- 絞り込みタブ -->
+      <section class="tab-body is-active" data-tab-body="filter">
+        <div class="count-box">
+          <span>表示中の POI</span>
+          <strong><span id="count-visible">-</span> / <span id="count-total">-</span> 件</strong>
+        </div>
+
+        <label class="field">
+          <span>名前で検索</span>
+          <input id="search" type="search" placeholder="例: カフェ, Starbucks" autocomplete="off">
+        </label>
+
+        <label class="field">
+          <span>confidence（存在する確からしさ）: <strong id="conf-value">0.00</strong> 以上</span>
+          <input id="confidence" type="range" min="0" max="1" step="0.05" value="0">
+          <span class="range-scale"><span>0（不確か）</span><span>1（確か）</span></span>
+        </label>
+
+        <div class="field">
+          <div class="legend-head">
+            <span>カテゴリ（凡例）</span>
+            <span class="legend-actions">
+              <button type="button" id="cat-all">全選択</button>
+              <button type="button" id="cat-none">全解除</button>
+            </span>
+          </div>
+          <ul id="legend" class="legend"></ul>
+          <p class="hint">色は <code>taxonomy.hierarchy</code> の最上位（大分類）です。</p>
+        </div>
+
+        <p class="hint">地図上の点をクリック（タップ）すると詳細が見られます。</p>
+      </section>
+
+      <!-- 解説タブ -->
+      <section class="tab-body" data-tab-body="about">
+        <h2>Overture Maps とは？</h2>
+        <p>
+          Amazon・Meta・Microsoft・TomTom などが参加する
+          <a href="https://overturemaps.org/" target="_blank" rel="noopener">Overture Maps Foundation</a>
+          が公開している、世界規模のオープンな地図データです。
+          建物・道路・行政区画・場所（Places）などのテーマがあり、毎月更新されています。
+          複数の会社や OpenStreetMap などのデータを統合し、共通の形式（スキーマ）にそろえているのが特徴です。
+        </p>
+
+        <h2>Places データとは？</h2>
+        <p>
+          お店・飲食店・病院・学校など「人が訪れる場所」を点で表したデータです。
+          この地図では青山キャンパス周辺の約 2km 四方から <strong id="about-count">-</strong> 件を取得しました
+          （リリース <code id="about-release">-</code>）。
+        </p>
+
+        <h2>用語ミニ辞典</h2>
+        <dl class="glossary">
+          <dt>POI</dt>
+          <dd>Point of Interest の略。お店や駅など「地図上の気になる地点」のことです。</dd>
+
+          <dt>confidence</dt>
+          <dd>その場所が本当に存在する確からしさを 0〜1 で表した値です。1 に近いほど「実在する可能性が高い」とされます。正確さの保証ではない点に注意。</dd>
+
+          <dt>GERS ID</dt>
+          <dd>Global Entity Reference System の ID。地物ごとに振られた固有の番号（UUID）で、毎月のリリースをまたいで同じ場所を同じ ID で追いかけられます。</dd>
+
+          <dt>bbox</dt>
+          <dd>Bounding Box。「西・南・東・北」の座標で決める四角い範囲です。世界中のデータから必要な範囲だけを取り出すのに使いました。</dd>
+
+          <dt>GeoJSON</dt>
+          <dd>位置情報（座標）と属性（名前など）をまとめて保存できる JSON 形式の地理データです。ブラウザで扱いやすいので Web 地図でよく使われます。</dd>
+
+          <dt>MapLibre</dt>
+          <dd>MapLibre GL JS。Web ブラウザで地図を描くためのオープンソースの JavaScript ライブラリです。この地図の表示に使っています。</dd>
+        </dl>
+
+        <h2>Overture のデータ構造で面白かったところ</h2>
+        <ul class="plain">
+          <li><code>sources</code> に「どの会社のデータから来たか」と、そのライセンスが POI ごとに入っています。</li>
+          <li>カテゴリは <code>basic_category</code>（分かりやすい大まかな分類）と <code>taxonomy</code>（階層つきの細かい分類）の 2 本立てです。旧 <code>categories</code> は 2026 年 9 月リリースで廃止されました。</li>
+          <li>名前は <code>names.primary</code> のほか、言語ごとの別名（例: 英語名）を持てます。</li>
+        </ul>
+      </section>
+
+      <!-- 出典タブ -->
+      <section class="tab-body" data-tab-body="credit">
+        <h2>データ出典</h2>
+        <p>
+          POI データ: <a href="https://overturemaps.org/" target="_blank" rel="noopener">Overture Maps Foundation, overturemaps.org</a>
+          （Places テーマ, リリース <code id="credit-release">-</code>）
+        </p>
+        <p>Places のデータは提供元ごとにライセンスが異なります。</p>
+        <ul id="credit-sources" class="plain"></ul>
+        <ul class="plain small">
+          <li>Meta / Microsoft / PinMeTo / DAC ほか: <a href="data/licenses/CDLA-Permissive-2.0.txt">CDLA Permissive 2.0</a></li>
+          <li>Foursquare: © 2026 Foursquare Labs, Inc. All rights reserved. <a href="data/licenses/Apache-2.0.txt">Apache 2.0</a>（<a href="data/licenses/FOURSQUARE_NOTICE.txt">NOTICE</a>）。Foursquare data was transformed to the Overture schema.</li>
+          <li>AllThePlaces: <a href="data/licenses/CC0-1.0.txt">CC0 1.0</a></li>
+        </ul>
+        <p class="small">
+          本サイトのデータは、Overture のデータから対象範囲を切り出し、表示に必要な項目だけを残して GeoJSON に変換したものです。
+        </p>
+
+        <h2>背景地図</h2>
+        <p><a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル（淡色地図）</a> 国土地理院</p>
+
+        <h2>このサイトのライセンス</h2>
+        <p>
+          本サイトのコード・文章・デザイン（自作部分）は
+          <a href="https://creativecommons.org/licenses/by/4.0/deed.ja" target="_blank" rel="noopener">CC BY 4.0</a>
+          です。© 2026 Kousaku Nakagawa（FuruhashiLab）。
+          Overture Maps 由来のデータには CC BY 4.0 は適用されず、上記の元のライセンスに従います。
+        </p>
+        <p class="small">
+          ソースコード: <a href="https://github.com/furuhashilab/Hackathon_Oct_KousakuNakagawa" target="_blank" rel="noopener">GitHub リポジトリ</a>
+        </p>
+      </section>
+    </aside>
+  </main>
+
+  <div id="loading" class="loading" role="status">データを読み込み中…</div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
