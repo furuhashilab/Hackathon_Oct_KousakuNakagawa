@@ -1,0 +1,40 @@
+Aoyama Overture Places Map
+Copyright 2026 Kousaku Nakagawa (FuruhashiLab)
+
+The original work in this repository (code, text, design) is licensed under
+CC BY 4.0. See LICENSE.
+
+This repository and its GitHub Pages site redistribute a subset of
+Overture Maps Foundation data (theme: places, release 2026-09-23.1):
+
+  docs/data/aoyama_places.geojson
+  docs/data/metadata.json
+
+Attribution: Overture Maps Foundation, overturemaps.org
+
+The CC BY 4.0 license does NOT apply to that data. Each record keeps the
+license of its original source, recorded in its "sources" property:
+
+  - Meta, Microsoft, PinMeTo, DAC and Overture-computed values:
+      Community Data License Agreement – Permissive, Version 2.0
+      (LICENSES/CDLA-Permissive-2.0.txt)
+  - Foursquare:
+      Copyright 2026 Foursquare Labs, Inc. All rights reserved.
+      Apache License 2.0 (LICENSES/Apache-2.0.txt)
+      Foursquare data was transformed to the Overture schema.
+      Full Foursquare notice: LICENSES/FOURSQUARE_NOTICE.txt
+  - AllThePlaces:
+      CC0 1.0 Universal (LICENSES/CC0-1.0.txt)
+
+Notice of modifications (Apache-2.0 section 4(b) / Foursquare NOTICE):
+  The data was clipped to the bounding box 139.6997,35.6518,139.7217,35.6698
+  (around Aoyama Gakuin University, Aoyama Campus, Tokyo), converted from
+  GeoParquet to GeoJSON, and reduced to the following properties:
+  id, names.primary, English name, basic_category, taxonomy.primary,
+  taxonomy.hierarchy, confidence (rounded to 3 decimals), operating_status,
+  first address (freeform), first website, and sources (dataset, license).
+  No values were otherwise edited.
+
+Background map tiles in the web map: 地理院タイル (GSI Tiles), Geospatial
+Information Authority of Japan. Tiles are loaded at view time and are not
+redistributed in this repository.
